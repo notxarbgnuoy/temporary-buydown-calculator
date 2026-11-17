@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Estimate the upfront cost and monthly payments for a temporary mortgage buydown.">
+  <title>Temporary Buydown Calculator | TruPath Home Loans</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:400,500,600&amp;display=swap">
+  <link rel="stylesheet" href="assets/buydown.css?v=7">
+  <script type="module" src="assets/buydown-page.js?v=10"></script>
+</head>
+<body>
+  <main class="calculator" aria-label="Temporary buydown calculator">
+    <div class="workspace">
+      <div class="results">
+        <section class="panel funding" aria-labelledby="cost-title">
+          <div class="funding-hero">
+            <h2 id="cost-title">Estimated buydown cost</h2>
+            <p class="cost" id="cost" aria-live="polite">—</p>
+            <p class="cost-note" id="cost-note" role="status">Enter an interest rate to see your estimate.</p>
+            <p class="credit-balance" id="credit-balance" role="status" hidden><span id="credit-balance-label"></span><strong id="credit-balance-amount"></strong></p>
+            <p class="ipc-warning" id="ipc-warning" role="status" hidden></p>
+            <p class="ipc-warning" id="seller-credit-warning" role="status" hidden></p>
+          </div>
+          <div class="comparison">
+            <h3 id="comparison-title">How the rate changes buydown cost</h3>
+            <p class="help">Select a rate to preview the cost and monthly payments.</p>
+            <div class="scenarios" role="group" aria-labelledby="comparison-title">
+              <button type="button" data-scenario="0" aria-pressed="false" disabled><span>−0.25 pts</span><strong>—</strong><small>—</small></button>
+              <button type="button" data-scenario="1" aria-pressed="true" disabled><span>Your rate</span><strong>—</strong><small>—</small></button>
+              <button type="button" data-scenario="2" aria-pressed="false" disabled><span>+0.25 pts</span><strong>—</strong><small>—</small></button>
+            </div>
+          </div>
+          <details id="type-comparison" hidden>
+            <summary>Compare buydown types</summary>
+            <table aria-label="Estimated funding by buydown type">
+              <caption id="type-rate"></caption>
+              <thead><tr><th scope="col">Buydown type</th><th scope="col">Seller credit needed</th></tr></thead>
+              <tbody id="type-costs"></tbody>
+            </table>
+          </details>
+        </section>
+
+        <section class="panel payments" aria-labelledby="payment-title">
+          <header class="panel-heading"><h2 id="payment-title">Monthly payments</h2><span id="payment-rate" class="rate-label" hidden></span></header>
+          <p class="help" id="payment-note" hidden></p>
+          <p id="empty-payment" class="empty-payment">Your payment schedule will appear here.</p>
+          <div id="payment-results" hidden>
+            <figure class="payment-chart" aria-label="Monthly payment breakdown by period">
+              <div class="payment-plot" id="payment-plot">
+                <div class="payment-columns" id="payment-columns"></div>
+                <div class="payment-breakdown" id="payment-breakdown" hidden>
+                  <h3 id="breakdown-period"></h3>
+                  <dl id="breakdown-lines"></dl>
+                </div>
+              </div>
+              <figcaption class="payment-key" id="payment-key"></figcaption>
+            </figure>
+            <template id="payment-column-template">
+              <div class="payment-column">
+                <strong class="payment-amount"></strong>
+                <div class="payment-stack"></div>
+                <span class="payment-period"></span>
+              </div>
+            </template>
+            <table aria-label="Monthly payment schedule">
+              <thead><tr><th scope="col">Period</th><th scope="col">Buyer pays</th><th scope="col">Monthly subsidy</th></tr></thead>
+              <tbody id="payments"></tbody>
+            </table>
+            <details class="ipc" id="ipc">
+              <summary>Seller credit limits (IPC)</summary>
+              <div id="ipc-property" class="ipc-property">
+                <label for="ipc-occupancy">Property use</label>
+                <select id="ipc-occupancy">
+                  <option value="primary">Primary residence</option>
+                  <option value="second">Second home</option>
+                  <option value="investment">Investment property</option>
+                </select>
+              </div>
+              <p class="ipc-limit" aria-live="polite"><span id="ipc-tier"></span><strong id="ipc-limit"></strong></p>
+            </details>
+          </div>
+        </section>
+      </div>
+      <form class="inputs" id="inputs" novalidate>
+        <fieldset aria-label="Loan program">
+          <div class="segmented">
+            <label><input type="radio" name="program" value="conventional" checked><span>Conventional</span></label>
+            <label><input type="radio" name="program" value="fha"><span>FHA</span></label>
+            <label><input type="radio" name="program" value="va"><span>VA</span></label>
+          </div>
+        </fieldset>
+
+        <div>
+          <label for="price">Purchase price</label>
+          <div class="field"><span aria-hidden="true">$</span><input id="price" inputmode="decimal" data-money value="700,000"></div>
+          <input id="price-range" type="range" min="100000" max="1500000" step="5000" value="700000" aria-label="Adjust purchase price">
+        </div>
+
+        <div>
+          <div class="pair">
+            <div><label for="down-percent">Down payment (%)</label><div class="field"><input id="down-percent" inputmode="decimal" value="10"><span aria-hidden="true">%</span></div></div>
+            <div><label for="down">Down payment ($)</label><div class="field"><span aria-hidden="true">$</span><input id="down" inputmode="decimal" data-money value="70,000"></div></div>
+          </div>
+          <input id="down-range" type="range" min="0" max="99" step="0.5" value="10" aria-label="Adjust down payment percentage">
+        </div>
+
+        <div id="va-settings" hidden>
+          <label for="va-use">VA Funding Fee</label>
+          <select id="va-use">
+            <option value="first">First-time use</option>
+            <option value="subsequent">Subsequent use</option>
+            <option value="exempt">Disability / exempt</option>
+          </select>
+        </div>
+
+        <dl class="financing" id="financing" hidden>
+          <div><dt id="fee-label"></dt><dd id="fee-amount">—</dd></div>
+          <div><dt>Total loan amount</dt><dd id="financed-total">—</dd></div>
+        </dl>
+
+        <div class="pair">
+          <div>
+            <label for="rate">Interest rate</label>
+            <div class="field"><input id="rate" inputmode="decimal" value="6.5" required><span aria-hidden="true">%</span></div>
+            <input id="rate-range" type="range" min="0" max="15" step="0.125" value="6.5" aria-label="Adjust interest rate">
+          </div>
+          <div>
+            <label for="term">Loan term</label>
+            <div class="field"><input id="term" inputmode="numeric" value="30" required><span>years</span></div>
+            <input id="term-range" type="range" min="8" max="30" step="1" value="30" aria-label="Adjust loan term in years">
+          </div>
+        </div>
+
+        <div class="schedule">
+          <label for="schedule">Temporary buydown type</label>
+          <select id="schedule" aria-describedby="schedule-help"></select>
+          <p class="help" id="schedule-help"></p>
+        </div>
+
+        <details id="escrow">
+          <summary>Taxes &amp; insurance</summary>
+          <div class="escrow-fields">
+            <label class="check"><input id="include-escrow" type="checkbox"> Include taxes &amp; homeowners insurance</label>
+            <div class="pair">
+              <div><label for="taxes">Annual property taxes</label><div class="field"><span aria-hidden="true">$</span><input id="taxes" data-money inputmode="decimal"></div></div>
+              <div><label for="insurance">Annual homeowners insurance</label><div class="field"><span aria-hidden="true">$</span><input id="insurance" data-money inputmode="decimal"></div></div>
+            </div>
+            <p id="housing-cost-status" class="help" role="status" hidden></p>
+            <div id="mi-settings" hidden>
+              <label class="check"><input id="include-mi" type="checkbox"> <span id="include-mi-label"></span></label>
+              <div class="mi-rate">
+                <label for="mi-rate" id="mi-rate-label">Annual PMI rate</label>
+                <output id="mi-rate-value" for="mi-rate"></output>
+              </div>
+              <input id="mi-rate" type="range" min="0" max="1.5" step="0.01" value="0.44">
+              <p class="help" id="mi-estimate"></p>
+            </div>
+          </div>
+        </details>
+        <details>
+          <summary>Seller credit (optional)</summary>
+          <div>
+            <label for="seller-credit">Seller concessions</label>
+            <div class="field"><span aria-hidden="true">$</span><input id="seller-credit" inputmode="decimal" data-money aria-describedby="seller-credit-help seller-credit-share"></div>
+            <p class="help" id="seller-credit-help">Enter a credit to check the seller credit limit and see what’s left after the selected buydown.</p>
+            <p class="help credit-share" id="seller-credit-share" aria-live="polite" hidden></p>
+          </div>
+        </details>
+      </form>
+    </div>
+
+  </main>
+</body>
+</html>
